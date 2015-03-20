@@ -5,10 +5,11 @@ import java.util.List;
 import com.lancy.mysmallnotes.bean.NoteBean;
 
 public interface IMainModel {
-
+	List<NoteBean> getNotes();
 	List<NoteBean> getNotes(int date);
 	boolean addNote(NoteBean noteBean);
 	boolean deleteNote(int id);
 	boolean changeNote(NoteBean noteBean);
+	boolean changeNote(int id,boolean isCompleted);
 	
 }

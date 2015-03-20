@@ -1,5 +1,13 @@
 <resources>
 
-    <string name="app_name">MySmallNotes</string>
+    <string name="app_name">Small Notes</string>
 
+    <string name="delete">DELETE</string>
+    <string name="edit">EDIT</string>
+    <string name="done">DONE</string>
+    <string name="active">ACTIVE</string>
+    
+    <string name="addok">添加成功</string>
+    <string name="adderror">添加失败</string>
+    
 </resources>

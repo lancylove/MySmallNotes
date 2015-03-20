@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" 
+     android:background="@color/background"
+    
+     >
+     
+    <include  layout="@layout/toptitle" android:id="@+id/add_title"/>
+    
+    
+    <EditText 
+        android:id="@+id/add_edit"
+        android:layout_below="@+id/add_title"
+         android:layout_width="match_parent"
+    android:layout_height="150dp"
+        android:background="@android:color/white"
+        android:layout_margin="5dp"
+        android:padding="10dp"
+        android:textSize="15sp"
+        android:textColor="@android:color/black"
+        android:hint="140字以内"
+        android:gravity="top"
+        />
+    
+    <TextView 
+        android:layout_alignBottom="@+id/add_edit"
+        android:layout_alignRight="@+id/add_edit"
+         android:layout_width="40dp"
+    android:layout_height="40dp"
+        android:text="140"
+        android:textColor="@android:color/white"
+        android:gravity="center"
+        android:background="@drawable/circlebg"
+        />
+    
+</RelativeLayout>
