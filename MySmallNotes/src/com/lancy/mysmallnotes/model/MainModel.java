@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
-import android.util.Log;
+import android.location.Criteria;
 
-import com.justsy.android.core.db.Criteria;
-import com.justsy.android.core.db.DBUtil;
-import com.justsy.android.core.db.DbException;
 import com.lancy.mysmallnotes.bean.NoteBean;
+import com.lancy.mysmallnotes.db.DBUtil;
 import com.lancy.mysmallnotes.model.impl.IMainModel;
 
 public class MainModel implements IMainModel {
@@ -22,12 +20,11 @@ public class MainModel implements IMainModel {
 	public static int Saturday = 6;
 	public static int Sunday = 7;
 	Context context;
-	private DBUtil dbUtil;
+DBUtil dbUtil ;
 
 	public MainModel(Context context) {
 		this.context = context;
-		DBUtil.init(context, true);
-		dbUtil = DBUtil.getInstance();
+		dbUtil = new DBUtil(context);
 	}
 
 	/**
@@ -49,40 +46,21 @@ public class MainModel implements IMainModel {
 	@Override
 	public List<NoteBean> getNotes(int date) {
 		// TODO Auto-generated method stub
-
-		try {
-			Criteria c = new Criteria();
-			c.and(NoteBean.NOTE_MODEL).eq(date);
-			return dbUtil.setCriteria(c).select(NoteBean.class);
-		} catch (DbException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return null;
-
+	    return dbUtil.getNotes(date);
+		
 	}
 
 	@Override
 	public boolean addNote(NoteBean noteBean) {
 		// TODO Auto-generated method stub
-		List<NoteBean> list = new ArrayList<NoteBean>();
-		try {
-			if (noteBean != null)
-				dbUtil.insert(noteBean);
-			return true;
-		} catch (DbException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		return dbUtil.addNote(noteBean);
 
-		return false;
 	}
 
 	@Override
 	public boolean deleteNote(int id) {
 		// TODO Auto-generated method stub
-		return false;
+	    return dbUtil.deleteNote(id);
 	}
 
 	@Override

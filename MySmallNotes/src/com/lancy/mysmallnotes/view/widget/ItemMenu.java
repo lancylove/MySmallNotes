@@ -1,109 +1,240 @@
 package com.lancy.mysmallnotes.view.widget;
 
+
 import android.content.Context;
-import android.content.res.TypedArray;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.MotionEvent;
-import android.view.ViewGroup;
-import android.widget.HorizontalScrollView;
+import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.Scroller;
+import android.widget.TextView;
 
 import com.lancy.mysmallnotes.R;
-import com.lancy.mysmallnotes.util.ScreenUtils;
 
-public class ItemMenu extends HorizontalScrollView {
-//	LogUtil.makeLog(ItemMenu.class);
-	
-	/**
-	 * 屏幕宽度
-	 */
-	private int mScreenWidth;
-	/**
-	 * dp
-	 */
-	private int mMenuWidth;
-	
-	/**
-	 * 菜单的宽度
-	 */
+/**
+ * 向左滑动 删除
+ * @author Lancy
+ *
+ */
+public class ItemMenu extends LinearLayout {
+    private String LOGCAT = "SlidView";
+    private Context mContext;
+    
+ // 用来放置所有view的容器
+    private LinearLayout mViewContent;
+    // 用来放置内置view的容器，比如删除 按钮
+    private RelativeLayout mHolder;
+    // 弹性滑动对象，提供弹性滑动效果
+    private Scroller mScroller;
+    // 滑动回调接口，用来向上层通知滑动事件
+    private OnSlideListener mOnSlideListener;
+    // 内置容器的宽度 单位：dp
+    private int mHolderWidth = 210;
+    // 分别记录上次滑动的坐标
+    private int mLastX = 0;
+    private int mLastY = 0;
+    // 用来控制滑动角度，仅当角度a满足如下条件才进行滑动：tan a = deltaX / deltaY > 2
+    private static final int TAN = 2;
+    public interface OnSlideListener {
+        // SlideView的三种状态：开始滑动，打开，关闭
+        public static final int SLIDE_STATUS_OFF = 0;
+        public static final int SLIDE_STATUS_START_SCROLL = 1;
+        public static final int SLIDE_STATUS_ON = 2;
+        /**
+        * @param view
+        * current SlideView
+        * @param status
+        * SLIDE_STATUS_ON, SLIDE_STATUS_OFF or
+        * SLIDE_STATUS_START_SCROLL
+        */
+        public void onSlide(View view, int status);
+    }
+    
+    public ItemMenu(Context context) {
+        super(context);
+        initView();
+    }
 
-	private int mMenuWidth1;
-	private int mMenuWidth2;
-	private int mMenuWidth3;
-	
+    public ItemMenu(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+        initView();
+    }
 
-	private int mHalfMenuWidth1;
-	private int mHalfMenuWidth2;
-	private int mHalfMenuWidth3;
-	
-	private boolean isOpen;
-	private boolean once;
+    public ItemMenu(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        initView();
+    }
+    
+    
+    private void initView() {
+        mContext = getContext();
+        // 初始化弹性滑动对象
+        mScroller = new Scroller(mContext);
+        // 设置其方向为横向
+        setOrientation(LinearLayout.HORIZONTAL);
+        // 将slide_view_merge加载进来
+        View.inflate(mContext, R.layout.slidcontent, this);
+        mViewContent = (LinearLayout) findViewById(R.id.view_content);
+        mHolder = (RelativeLayout) findViewById(R.id.holder);
+        
+        mHolderWidth = Math.round(TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP, mHolderWidth, getResources()
+        .getDisplayMetrics()));
+        
+    }
+    
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        // TODO Auto-generated method stub
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        
+       
+    }
+    
+    public void setOnClick(OnClickListener click){
+        mHolder.findViewById(R.id.delete).setOnClickListener(click);
+        mHolder.findViewById(R.id.edit).setOnClickListener(click);
+        mHolder.findViewById(R.id.done).setOnClickListener(click);
+        
+    }
+    
+    public void setTVContent(String str){
+        TextView tv = (TextView) mViewContent.findViewById(R.id.tv_content);
+        tv.setText(str);
+    }
+    
+    
+    
+   public void setHolderView(View view){
+      
+    
+       mHolder.addView(view);
+   }
+    
+    // 将view加入到ViewContent中
+    public void setContentView(View view) {
+       
+        mViewContent.addView(view);
+    }
+    // 设置滑动回调
+    public void setOnSlideListener(OnSlideListener onSlideListener) {
+        mOnSlideListener = onSlideListener;
+    }
+    // 将当前状态置为关闭
+    public void shrink() {
+        if (getScrollX() != 0) {
+            this.smoothScrollTo(0, 0);
+        }
+    }
+    private void smoothScrollTo(int destX, int destY) {
+         // 缓慢滚动到指定位置
+         int scrollX = getScrollX();
+         int delta = destX - scrollX;
+         // 以三倍时长滑向destX，效果就是慢慢滑动
+         Log.e(LOGCAT, "delta="+delta);
+         mScroller.startScroll(scrollX, 0, delta, 0, Math.abs(delta) );
+         invalidate();
+        
+    }
+    @Override
+    public void computeScroll() {
+         if (mScroller.computeScrollOffset()) {
+             scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
+             postInvalidate();
+         }
+     }
+     
+  // 根据MotionEvent来进行滑动，这个方法的作用相当于onTouchEvent
+  // 如果你不需要处理滑动冲突，可以直接重命名，照样能正常工作
+  public void onRequireTouchEvent(MotionEvent event) {
+      int x = (int) event.getX();
+      int y = (int) event.getY();
+      int scrollX = getScrollX();
+    
+      switch (event.getAction()) {
+      case MotionEvent.ACTION_DOWN: {
+          
+          if (!mScroller.isFinished()) {
+          mScroller.abortAnimation();
+          }
+          if (mOnSlideListener != null) {
+          mOnSlideListener.onSlide(this,
+          OnSlideListener.SLIDE_STATUS_START_SCROLL);
+          }
+          break;
+      }
+      case MotionEvent.ACTION_MOVE: {
+          int deltaX = x - mLastX;
+          int deltaY = y - mLastY;
+          
+          if (Math.abs(deltaX) < Math.abs(deltaY) * TAN) {
+          // 滑动不满足条件，不做横向滑动
+          break;
+          }
+          // 计算滑动终点是否合法，防止滑动越界
+          int newScrollX = scrollX - deltaX;
+          
+          if (deltaX != 0) {
+              if (newScrollX < 0) {
+                  newScrollX = 0;
+              } else if (newScrollX > mHolderWidth) {
+                  newScrollX = mHolderWidth;
+              }
+              this.scrollTo(newScrollX, 0);
+           
+          }
+          break;
+      }
+      case MotionEvent.ACTION_UP: {
+          int newScrollX = 0;
+          // 这里做了下判断，当松开手的时候，会自动向两边滑动，具体向哪边滑，要看当前所处的位置
+          if (scrollX - mHolderWidth * 0.75 > 0) {
+              newScrollX = mHolderWidth;
+          }
+        Log.e(LOGCAT, "newScrollX="+newScrollX);
+          // 慢慢滑向终点
+          this.smoothScrollTo(newScrollX, 0);
+          // 通知上层滑动事件
+          if (mOnSlideListener != null) {
+              mOnSlideListener.onSlide(this,
+              newScrollX == 0 ? OnSlideListener.SLIDE_STATUS_OFF
+              : OnSlideListener.SLIDE_STATUS_ON);
+          }
+          break;
+      }
+      default:{
+          int newScrollX = 0;
+          // 这里做了下判断，当松开手的时候，会自动向两边滑动，具体向哪边滑，要看当前所处的位置
+          if (scrollX - mHolderWidth * 0.75 > 0) {
+              newScrollX = mHolderWidth;
+          }
+        Log.e(LOGCAT, "newScrollX="+newScrollX);
+          // 慢慢滑向终点
+          this.smoothScrollTo(newScrollX, 0);
+          // 通知上层滑动事件
+          if (mOnSlideListener != null) {
+              mOnSlideListener.onSlide(this,
+              newScrollX == 0 ? OnSlideListener.SLIDE_STATUS_OFF
+              : OnSlideListener.SLIDE_STATUS_ON);
+          }
+          break;
+          
+      }
+      }
+      mLastX = x;
+      mLastY = y;
+  }
 
-	private ViewGroup mMenu;
-	private ViewGroup mContent;
-	
-	
-	
-	public ItemMenu(Context context, AttributeSet attrs) {
-		this(context, attrs,0);
-		// TODO Auto-generated constructor stub
-	}
-
-	public ItemMenu(Context context) {
-		this(context,null);
-		// TODO Auto-generated constructor stub
-	}
-	public ItemMenu(Context context, AttributeSet attrs, int defStyle) {
-		super(context, attrs, defStyle);
-		mScreenWidth = ScreenUtils.getScreenWidth(context);
-
-		TypedArray a = context.getTheme().obtainStyledAttributes(attrs,
-				R.styleable.ItemMenu, defStyle, 0);
-		mMenuWidth = (int) a.getDimension(R.styleable.ItemMenu_menuwidth, 10);
-		a.recycle();
-		
-	}
-	
-	
-	@Override
-	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		// TODO Auto-generated method stub
-		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-		if(once){
-			LinearLayout wrapper = (LinearLayout) getChildAt(0);
-			mContent = (ViewGroup) wrapper.getChildAt(0);
-			mMenu = (ViewGroup) wrapper.getChildAt(1);
-			
-			
-		}
-		
-		
-		
-	}
-	
-	@Override
-	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-		// TODO Auto-generated method stub
-		super.onLayout(changed, l, t, r, b);
-		
-		
-		
-		
-		
-	}
-
-	@Override
-	public boolean onTouchEvent(MotionEvent ev) {
-		// TODO Auto-generated method stub
-		return super.onTouchEvent(ev);
-	}
-	
-	
-	
-	
-
-	
-	
-	
-	
+          @Override
+        protected void onDraw(Canvas canvas) {
+            // TODO Auto-generated method stub
+            super.onDraw(canvas);
+            
+            
+        }
+  
 }

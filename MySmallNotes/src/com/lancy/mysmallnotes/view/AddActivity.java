@@ -74,6 +74,7 @@ public class AddActivity extends Activity implements IMainView,OnClickListener{
 	public void AddNotes(boolean isOK) {
 		// TODO Auto-generated method stub
 		if(isOK){
+			editText.setText("");
 			UIUtil.ToastMsgTop(context, getResources().getString(R.string.addok));
 			
 		}else{

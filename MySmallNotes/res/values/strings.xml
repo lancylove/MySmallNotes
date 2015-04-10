@@ -1,11 +1,11 @@
 <resources>
 
-    <string name="app_name">Small Notes</string>
+    <string name="app_name">今日事，今日毕！</string>
 
-    <string name="delete">DELETE</string>
+    <string name="delete">DEL</string>
     <string name="edit">EDIT</string>
     <string name="done">DONE</string>
-    <string name="active">ACTIVE</string>
+    <string name="active">ACT</string>
     
     <string name="addok">添加成功</string>
     <string name="adderror">添加失败</string>

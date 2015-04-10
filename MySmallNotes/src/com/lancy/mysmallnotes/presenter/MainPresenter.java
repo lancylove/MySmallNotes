@@ -16,8 +16,9 @@ public class MainPresenter {
 	public MainPresenter(IMainView mainView,Context context) {
 		// TODO Auto-generated constructor stub
 		this.mainView = mainView;
-		this.mainModel = new MainModel(context);
 		this.context = context;
+		this.mainModel = new MainModel(this.context);
+		
 	}
 
 	

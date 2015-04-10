@@ -3,4 +3,5 @@
     <dimen name="toptitle_height">44dp</dimen>
     <dimen name="toptitle_btn_padd">10dp</dimen>
     <dimen name="toptitle_tv_textSize">13sp</dimen>
+    <dimen name="holdertvwidth">70dp</dimen>
 </resources>
